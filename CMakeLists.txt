@@ -1,29 +1,21 @@
-cmake_minimum_required(VERSION 3.26)
+cmake_minimum_required(VERSION 3.10)
 project(ims)
 
-set(CMAKE_CXX_STANDARD 14)
+# set the c++ standard
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
-# Add the header include directory
-include_directories(${CMAKE_SOURCE_DIR}/include)
+set(THIRD_PARTY_DIR "${CMAKE_SOURCE_DIR}/third_party")
+set(SIMLIB_BIN_DIR "${THIRD_PARTY_DIR}/simlib/bin")
 
-# Add the library directory
-link_directories(${CMAKE_SOURCE_DIR}/lib)
+# include directories for the header files
+include_directories(src "${SIMLIB_BIN_DIR}/include")
 
-# Add your executable
-add_executable(ims src/main.cpp)
+# add all source files from the src directory
+file(GLOB SOURCES "src/*.cpp")
 
-# For static linking, use the static library directly:
-target_link_libraries(ims ${CMAKE_SOURCE_DIR}/lib/libsimlib.a)
+# define the executable with the collected source files
+add_executable(${PROJECT_NAME} ${SOURCES})
 
-# For dynamic linking (shared libraries): TODO: make this possible
-#target_link_libraries(ims simlib)
-
-# Set RPATH so that the executable finds shared libraries at runtime
-set(CMAKE_INSTALL_RPATH "${CMAKE_SOURCE_DIR}/lib")
-set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-
-# Ensure the linker can find shared libraries during build
-set(CMAKE_SKIP_BUILD_RPATH FALSE)
-
-# Ensure RPATH is used when installing
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+# link the static library
+target_link_libraries(${PROJECT_NAME} "${SIMLIB_BIN_DIR}/lib/libsimlib.a")
