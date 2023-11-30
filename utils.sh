@@ -30,7 +30,7 @@ buildProject() {
 }
 
 
-archive() {
+createArchive() {
     local archiveName=$1
 
     if [ -z "$archiveName" ]; then
