@@ -1,18 +1,21 @@
 cmake_minimum_required(VERSION 3.10)
 project(ims)
 
-# Set the C++ standard
+# set the c++ standard
 set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
-# Include directories for the header files
-include_directories(src third_party/simlib/bin/include)
+set(THIRD_PARTY_DIR "${CMAKE_SOURCE_DIR}/third_party")
+set(SIMLIB_BIN_DIR "${THIRD_PARTY_DIR}/simlib/bin")
 
-# Add all source files from the src directory
+# include directories for the header files
+include_directories(src "${SIMLIB_BIN_DIR}/include")
+
+# add all source files from the src directory
 file(GLOB SOURCES "src/*.cpp")
 
-# Define the executable with the collected source files
+# define the executable with the collected source files
 add_executable(${PROJECT_NAME} ${SOURCES})
 
-# Link the static library
-target_link_libraries(${PROJECT_NAME} "${CMAKE_SOURCE_DIR}/third-parties/simlib/bin/lib/libsimlib.a")
+# link the static library
+target_link_libraries(${PROJECT_NAME} "${SIMLIB_BIN_DIR}/lib/libsimlib.a")
