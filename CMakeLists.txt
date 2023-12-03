@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
 set(THIRD_PARTY_DIR "${CMAKE_SOURCE_DIR}/third_party")
 set(SIMLIB_BIN_DIR "${THIRD_PARTY_DIR}/simlib/bin")
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # include directories for the header files
 include_directories(src "${SIMLIB_BIN_DIR}/include")
@@ -19,3 +20,4 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 
 # link the static library
 target_link_libraries(${PROJECT_NAME} "${SIMLIB_BIN_DIR}/lib/libsimlib.a")
+
