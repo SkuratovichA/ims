@@ -120,23 +120,28 @@ struct MetabolicModel {
   Function2 fn_V_mat1, fn_V_mat3, fn_V_gnmt, fn_V_ah;
   Function1 fn_V_meth, fn_K_mat3_m1, fn_V_ms;
 
-  MetabolicModel(double initialMet, double initialAdoMet, double initialAdoHcy,
-                 double initialHcy, double Metin)
-      : fn_V_cbs(Input(AdoMet), Input(AdoHcy), Input(Hcy), V_cbs),
-        fn_V_bhmt(Input(AdoMet), Input(AdoHcy), Input(Hcy), V_bhmt),
-        fn_V_mat1(Input(Met), Input(AdoMet), V_mat1),
-        fn_V_mat3(Input(Met), Input(AdoMet), V_mat3),
-        fn_V_gnmt(Input(AdoMet), Input(AdoHcy), V_gnmt),
-        fn_V_ah(Input(AdoHcy), Input(Hcy), V_ah),
-        fn_K_mat3_m1(Input(AdoMet), K_mat3_m1),
-        fn_V_meth(Input(AdoMet), V_meth), fn_V_ms(Input(Hcy), V_ms),
+  MetabolicModel(
+    double initialMet,
+    double initialAdoMet,
+    double initialAdoHcy,
+    double initialHcy,
+    double Metin
+  ) : 
+    fn_V_cbs(Input(AdoMet), Input(AdoHcy), Input(Hcy), V_cbs),
+    fn_V_bhmt(Input(AdoMet), Input(AdoHcy), Input(Hcy), V_bhmt),
+    fn_V_mat1(Input(Met), Input(AdoMet), V_mat1),
+    fn_V_mat3(Input(Met), Input(AdoMet), V_mat3),
+    fn_V_gnmt(Input(AdoMet), Input(AdoHcy), V_gnmt),
+    fn_V_ah(Input(AdoHcy), Input(Hcy), V_ah),
+    fn_K_mat3_m1(Input(AdoMet), K_mat3_m1),
+    fn_V_meth(Input(AdoMet), V_meth),
+    fn_V_ms(Input(Hcy), V_ms),
 
-        // Initialize the integrators with their respective differential
-        // equations
-        Met(fn_V_ms + fn_V_bhmt + Metin - fn_V_mat1 - fn_V_mat3, initialMet),
-        AdoMet(fn_V_mat1 + fn_V_mat3 - fn_V_meth - fn_V_gnmt, initialAdoMet),
-        AdoHcy(fn_V_meth + fn_V_gnmt - fn_V_ah, initialAdoHcy),
-        Hcy(fn_V_ah - fn_V_cbs - fn_V_ms - fn_V_bhmt, initialHcy) {}
+    // Initialize the integrators with their respective differential equations
+    Met(fn_V_ms + fn_V_bhmt + Metin - fn_V_mat1 - fn_V_mat3, initialMet),
+    AdoMet(fn_V_mat1 + fn_V_mat3 - fn_V_meth - fn_V_gnmt, initialAdoMet),
+    AdoHcy(fn_V_meth + fn_V_gnmt - fn_V_ah, initialAdoHcy),
+    Hcy(fn_V_ah - fn_V_cbs - fn_V_ms - fn_V_bhmt, initialHcy) {}
 };
 
 int main(int argc, char *argv[]) {
