@@ -1,6 +1,5 @@
 #include "simlib.h"
 #include <assert.h>
-#include <cstdlib>
 
 
 constexpr double MU_MOL = 1e-6;
@@ -23,8 +22,8 @@ constexpr double K_meth_m2__A = 10 * MU_MOL; // shitty name :)
 const double alpha_1 = 100;
 const double alpha_2 = 10;
 
-const double beta_1 = 1.7; // Assuming this is the correct value
-const double beta_2 = 30;  // Assuming this is the correct value
+const double beta_1 = 1.7;
+const double beta_2 = 30;
 
 constexpr double V_ms_max = 500 * MU_MOL;
 constexpr double K_ms_m_hcy = 0.1 * MU_MOL;
@@ -36,6 +35,27 @@ constexpr double K_bhmt_m = 12 * MU_MOL;
 
 constexpr double DEFAULT_T1 = 30.0;
 
+
+class Function3 : public aContiBlock3 {
+    Function3(const Function3&) = delete;
+    Function3&operator=(const Function3&) = delete;
+  double (*f)(double,double,double); // pointer to function
+ public:
+  Function3(Input i1, Input i2, Input i3, double (*pf)(double,double,double));
+  virtual double Value() override;
+  //virtual const char *Name() const;
+};
+
+Function3::Function3(Input i1, Input i2, Input i3, double (*pf)(double,double,double))
+
+  : aContiBlock3(i1,i2,i3), f(pf) {}
+
+double Function3::Value() {
+  /* AlgLoopDetector _(this); */
+  this->isEvaluated = true; // haha fuck you simlib
+  double ret = f(Input1Value(), Input2Value(), Input3Value());
+  return ret;
+}
 
 inline double V_ms(const double hcy) {
   // Michaelis-Menten equation implementation
@@ -102,17 +122,6 @@ inline double V_bhmt(const double adoMet, const double adoHcy, const double hcy)
   return exp1 * exp2;
 }
 
-
-class Function3 : public aContiBlock3 {
-    Function3(const Function3&) = delete;
-    Function3&operator=(const Function3&) = delete;
-  double (*f)(double,double); // pointer to function
- public:
-  Function3(Input i1, Input i2, Input i3, double (*pf)(double,double,double));
-  virtual double Value() override;
-  //virtual const char *Name() const;
-};
-
 struct MetabolicModel {
   Integrator Met, AdoMet, AdoHcy, Hcy;
 
@@ -144,28 +153,44 @@ struct MetabolicModel {
     Hcy(fn_V_ah - fn_V_cbs - fn_V_ms - fn_V_bhmt, initialHcy) {}
 };
 
-int main(int argc, char *argv[]) {
-  double maxtime = DEFAULT_T1;
+MetabolicModel *model = nullptr;
 
-  // TODO:
-  // 1. validate this
-  // 2. check the expressions at the end of the function
-  if (argc > 1) {
-    maxtime = std::atof(argv[1]);
-  } else {
-    _Print("\nUsage:  %s  [maxtime>=1,default=%g] \n\n", argv[0], DEFAULT_T1);
+void Sample() {
+  if (model != nullptr) {
+    Print("%6.2f %.5g %.5g %.5g %.5g\n", T.Value(), model->Met.Value(), model->AdoMet.Value(), model->AdoHcy.Value(), model->Hcy.Value());
   }
+};
 
-  if (maxtime < 1.0) {
-    _Print("\nUsage:  %s  [maxtime>=1,default=%g] \n\n", argv[0], DEFAULT_T1);
-    return 1;
-  }
+Sampler S(Sample, 0.01);
 
-  /* SetOutput("lorenz.dat"); // Redirect output to file */
-  /* Print("# Lorenz equation output (maxtime=%g) \n", maxtime); */
-  /* Print("# Time x1 x2 \n"); */
-  /* Init(0, maxtime);           // Initialize siMU_MOLlator */
-  /* SetAccuracy(1e-8);          // Required accuracy */
-  /* Run();                      // SiMU_MOLlate */
-  /* SIMLIB_statistics.Output(); // Print siMU_MOLlation run statistics */
+
+int main(const int argc, const char *argv[]) {
+  double initialMet = 0.5;
+  double initialAdoMet = 0.5;
+  double initialAdoHcy = 0.5;
+  double initialHcy = 0.5;
+  double Metin = 0.01;
+
+  MetabolicModel localModel(
+    initialMet,
+    initialAdoMet,
+    initialAdoHcy,
+    initialHcy,
+    Metin
+  );
+  model = &localModel;
+
+  SetOutput("metabolic_model_output.dat");
+  Print("# Time Met AdoMet AdoHcy Hcy\n");
+
+  const double startTime = 0;
+  const double endTime = 10;
+  Init(startTime, endTime);
+  SetStep(1e-3, 0.1);
+  SetAccuracy(1e-5, 0.01);
+
+  Run();
+
+  return 0;
 }
+
