@@ -25,6 +25,12 @@ struct SimulationConfiguration {
 };
 
 namespace argparser {
+  static std::string getUsage() {
+#define X(name) #name "<number>"
+    return "[" SIMULATION_VARIABLES "]" "endTime <number>";
+#undef X
+  }
+
   static SimulationConfiguration parseArguments(int argc, char **argv) {
     SimulationConfiguration config;
     std::unordered_map<std::string, bool> setFlags;

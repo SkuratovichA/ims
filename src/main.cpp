@@ -177,6 +177,7 @@ int main(int argc, char **argv) {
     configuration = argparser::parseArguments(argc, argv);
   } catch (std::runtime_error &e) {
     std::cerr << e.what() << std::endl;
+    std::cerr << "Usage: " << argv[0] << argparser::getUsage() << std::endl;
     return -1;
   }
   const InitialSimulationConfiguration isc = configuration.initialSimulationConfiguration.value_or(DEFAULT_SIMULATION_CONFIGURATION);
