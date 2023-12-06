@@ -1,6 +1,7 @@
+#include <iostream>
 #include "simlib.h"
 #include <assert.h>
-
+#include "argparser.h"
 
 constexpr double MU_MOL = 1e-6;
 constexpr double _5mthf = 5.2 * MU_MOL;
@@ -163,20 +164,29 @@ void Sample() {
 
 Sampler S(Sample, 0.01);
 
+#define X(name) .name = 0.5,
+const InitialSimulationConfiguration DEFAULT_SIMULATION_CONFIGURATION = {
+  SIMULATION_VARIABLES
+};
+#undef X
 
-int main(const int argc, const char *argv[]) {
-  double initialMet = 0.5;
-  double initialAdoMet = 0.5;
-  double initialAdoHcy = 0.5;
-  double initialHcy = 0.5;
-  double Metin = 0.01;
+int main(int argc, char **argv) {
 
+  SimulationConfiguration configuration;
+  try {
+    configuration = argparser::parseArguments(argc, argv);
+  } catch (std::runtime_error &e) {
+    std::cerr << e.what() << std::endl;
+    return -1;
+  }
+  const InitialSimulationConfiguration isc = configuration.initialSimulationConfiguration.value_or(DEFAULT_SIMULATION_CONFIGURATION);
+  
   MetabolicModel localModel(
-    initialMet,
-    initialAdoMet,
-    initialAdoHcy,
-    initialHcy,
-    Metin
+    isc.initialMet,
+    isc.initialAdoMet,
+    isc.initialAdoHcy,
+    isc.initialHcy,
+    isc.metin
   );
   model = &localModel;
 

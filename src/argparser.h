@@ -1,84 +1,92 @@
 #pragma once
 
-#include <string>
-#include <cstdint>
+#include <cstdlib>
 #include <getopt.h>
-#include <system_error>
 #include <optional>
+#include <string>
+#include <unordered_map>
+
+#define SIMULATION_VARIABLES                                                   \
+  X(initialMet)                                                                \
+  X(initialAdoMet)                                                             \
+  X(initialAdoHcy)                                                             \
+  X(initialHcy)                                                                \
+  X(metin)
 
 struct InitialSimulationConfiguration {
-  double initialMet;
-  double initialAdoMet;
-  double initialAdoHcy;
-  double initialHcy;
-  double Metin;
+#define X(name) double name;
+  SIMULATION_VARIABLES
+#undef X
 };
 
-struct SimulationConfigurtaion {
-  // this block should be either fully initialized or uninitialized completely
-  // create an optional initialSimulationConfiguration
-  std::optional<InitialSimulationConfiguration> initialSimunlationConfiguration;
+struct SimulationConfiguration {
+  std::optional<InitialSimulationConfiguration> initialSimulationConfiguration;
   std::optional<double> endTime;
 };
 
 namespace argparser {
+  static SimulationConfiguration parseArguments(int argc, char **argv) {
+    SimulationConfiguration config;
+    std::unordered_map<std::string, bool> setFlags;
+    std::string currentArg;
 
-    /* SimulationConfigurtaion parseArguments(int argc, const char **argv) { */
-    /**/
-    /*     SimulationConfigurtaion args{}; */
-    /*     int option; */
-    /*     int currentIdx = 0; */
-    /*     while ((option = getopt(argc, (char *const *) (argv), "rx6s:p:")) != -1) { */
-    /*         currentIdx += 1; */
-    /*         switch (option) { */
-    /*             case 'r': */
-    /*                 if (args.recursionRequested) { */
-    /*                     ThrowUsageMessage("Recursion Desired (-r) flag can be specified only once"); */
-    /*                 } */
-    /*                 args.recursionRequested = true; */
-    /*                 break; */
-    /*             case 'x': */
-    /*                 if (args.reverseQuery) { */
-    /*                     ThrowUsageMessage("Reversed query (-x) flag can be specified only once"); */
-    /*                 } */
-    /*                 args.reverseQuery = true; */
-    /*                 break; */
-    /*             case '6': */
-    /*                 if (args.queryTypeAAAA) { */
-    /*                     ThrowUsageMessage("AAAA query (-6) flag can be specified only once"); */
-    /*                 } */
-    /*                 args.queryTypeAAAA = true; */
-    /*                 break; */
-    /*             case 's': */
-    /*                 if (!args.server.empty()) { */
-    /*                     ThrowUsageMessage("Server (-s) parameter can be specified only once"); */
-    /*                 } */
-    /*                 args.server = optarg; */
-    /*                 break; */
-    /*             case 'p': */
-    /*                 if (args.port) { */
-    /*                     ThrowUsageMessage("Port (-p) parameter can be specified only once"); */
-    /*                 } */
-    /*                 args.port = static_cast<uint16_t>(std::stoi(optarg)); */
-    /*                 break; */
-    /*             case '?': */
-    /*             default: */
-    /*                 ThrowUsageMessage("unknown option \"" + std::string(argv[currentIdx]) + "\""); */
-    /*                 break; */
-    /*         } */
-    /*     } */
-    /**/
-    /*     if (args.server.empty()) { */
-    /*         ThrowUsageMessage("Server -s parameter must be specified"); */
-    /*     } */
-    /**/
-    /*     if (optind == argc - 1) { */
-    /*         args.address = argv[optind++]; */
-    /*     } else { */
-    /*         ThrowUsageMessage("Too many arguments"); */
-    /*     } */
-    /**/
-    /*     return args; */
-    /* } */
-}
+    static struct option longOptions[] = {
+#define X(name) {#name, required_argument, 0, 0},
+        SIMULATION_VARIABLES
+#undef X
+        {"endTimme", optional_argument, 0, 0},
+        {0, 0, 0, 0}};
 
+    int optionIndex = 0;
+    while (true) {
+      int c = getopt_long(argc, argv, "", longOptions, &optionIndex);
+
+      if (c == -1) {
+        break;
+      }
+
+      if (c == 0) {
+        currentArg = longOptions[optionIndex].name;
+        if (setFlags[currentArg]) {
+          throw std::runtime_error("Error: Argument '" + currentArg + "' initialized more than once.");
+        }
+        setFlags[currentArg] = true;
+
+        double value = std::atof(optarg);
+
+        if (currentArg == "endTime") {
+          config.endTime = value;
+          continue;
+        }
+
+        if (!config.initialSimulationConfiguration) {
+          config.initialSimulationConfiguration = InitialSimulationConfiguration{};
+        }
+        
+        // setting initial simulations configuration arguments if found
+#define X(name)                                                                \
+  if (currentArg == #name) {                                                   \
+    config.initialSimulationConfiguration->name = value;                       \
+  } else
+        SIMULATION_VARIABLES { /*intentionally empty to close the chain */ }
+#undef X
+
+      } else {
+        throw std::runtime_error(
+            "Error: Unknown argument or argument with no value.");
+      }
+    }
+
+#define X(name) if (!setFlags[#name])
+    // Checking if all required initialSimulationConfiguration fields are set
+    if (config.initialSimulationConfiguration) {
+      SIMULATION_VARIABLES {
+        throw std::runtime_error(
+          "Error: Some fields of InitialSimulationConfiguration are not initialized.");
+      }
+    }
+#undef X
+
+    return config;
+  }
+};
