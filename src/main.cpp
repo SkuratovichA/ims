@@ -1,6 +1,7 @@
+#include <iostream>
 #include "simlib.h"
 #include <assert.h>
-
+#include "argparser.h"
 
 constexpr double MU_MOL = 1e-6;
 constexpr double _5mthf = 5.2 * MU_MOL;
@@ -163,28 +164,32 @@ void Sample() {
 
 Sampler S(Sample, 0.01);
 
+int main(int argc, char **argv) {
 
-int main(const int argc, const char *argv[]) {
-  double initialMet = 0.5;
-  double initialAdoMet = 0.5;
-  double initialAdoHcy = 0.5;
-  double initialHcy = 0.5;
-  double Metin = 0.01;
-
+  SimulationConfiguration configuration;
+  try {
+    configuration = argparser::parseArguments(argc, argv);
+  } catch (std::runtime_error &e) {
+    std::cerr << e.what() << std::endl;
+    std::cerr << "Usage: " << argv[0] << " " <<  argparser::getUsage() << std::endl;
+    return -1;
+  }
+  const InitialSimulationConfiguration isc = configuration.initialSimulationConfiguration.value_or(DEFAULT_SIMULATION_CONFIGURATION);
+  
   MetabolicModel localModel(
-    initialMet,
-    initialAdoMet,
-    initialAdoHcy,
-    initialHcy,
-    Metin
+    isc.initialMet,
+    isc.initialAdoMet,
+    isc.initialAdoHcy,
+    isc.initialHcy,
+    isc.metin
   );
   model = &localModel;
 
-  SetOutput("metabolic_model_output.dat");
+  SetOutput(configuration.imagePath.value_or(DEFAULT_IMAGE_PATH).c_str());
   Print("# Time Met AdoMet AdoHcy Hcy\n");
 
   const double startTime = 0;
-  const double endTime = 10;
+  const double endTime = configuration.endTime.value_or(DEFAULT_END_TIME);
   Init(startTime, endTime);
   SetStep(1e-3, 0.1);
   SetAccuracy(1e-5, 0.01);
