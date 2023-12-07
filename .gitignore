@@ -5,3 +5,10 @@ cmake-build-debug
 .cache
 .vscode
 third_party
+
+**/**/*.dat
+**/*.dat
+**/**/*.png
+**/*.png
+*.dat
+*.png
