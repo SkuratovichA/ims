@@ -3,8 +3,9 @@
 #include <cstdlib>
 #include <getopt.h>
 #include <optional>
-#include <string>
 #include <unordered_map>
+#include <string>
+
 
 #define SIMULATION_VARIABLES                                                   \
   X(initialMet)                                                                \
@@ -24,10 +25,23 @@ struct SimulationConfiguration {
   std::optional<double> endTime;
 };
 
+#define X(name) .name = 0.5,
+const InitialSimulationConfiguration DEFAULT_SIMULATION_CONFIGURATION = {
+  SIMULATION_VARIABLES
+};
+#undef X
+
+#define END_TIME_STR "endTime"
+const double MIN_END_TIME = 1;
+
 namespace argparser {
   static std::string getUsage() {
-#define X(name) #name "<number>"
-    return "[" SIMULATION_VARIABLES "]" "endTime <number>";
+#define X(name) "--"#name " number "
+    return (
+      "[ " SIMULATION_VARIABLES "]" " [--" END_TIME_STR " number]\n"
+      "  simulation parameters: µMol\n"
+      "  endTime: (min " + std::to_string(MIN_END_TIME) + ")\n"
+    );
 #undef X
   }
 
@@ -38,10 +52,11 @@ namespace argparser {
 
     static struct option longOptions[] = {
 #define X(name) {#name, required_argument, 0, 0},
-        SIMULATION_VARIABLES
+      SIMULATION_VARIABLES
 #undef X
-        {"endTimme", optional_argument, 0, 0},
-        {0, 0, 0, 0}};
+      {END_TIME_STR, required_argument, 0, 0},
+      {0, 0, 0, 0}
+    };
 
     int optionIndex = 0;
     while (true) {
@@ -58,10 +73,18 @@ namespace argparser {
         }
         setFlags[currentArg] = true;
 
-        double value = std::atof(optarg);
+        char *anychars = NULL;
+        const double value = std::strtod(optarg, &anychars);
 
-        if (currentArg == "endTime") {
+        if (*anychars != '\0') {
+          throw std::runtime_error("Error: Argument '" + currentArg + "' is not a number. Found \"" + anychars + "\"");
+        }
+
+        if (currentArg == END_TIME_STR) {
           config.endTime = value;
+          if (config.endTime < MIN_END_TIME) {
+            throw std::runtime_error("Error: " END_TIME_STR " must be greater than " + std::to_string(MIN_END_TIME));
+          }
           continue;
         }
 
@@ -76,6 +99,7 @@ namespace argparser {
   } else
         SIMULATION_VARIABLES { /*intentionally empty to close the chain */ }
 #undef X
+
 
       } else {
         throw std::runtime_error(
@@ -92,6 +116,20 @@ namespace argparser {
       }
     }
 #undef X
+    // if the length of inintialSimulationConfiguration + optional (endTime) !== argc - 1 then throw error
+
+#define X(name) #name,
+    const char *(iscStrings[]) = { SIMULATION_VARIABLES };
+#undef X
+    const auto iscLength = config.initialSimulationConfiguration ? sizeof(iscStrings) / sizeof(char*) : 0;
+
+    const auto numProcessedArgs = (iscLength + !!config.endTime.has_value()) * 2;
+    const bool areAnyExtraArgs = numProcessedArgs != argc - 1;
+    if (areAnyExtraArgs) {
+      throw std::runtime_error(
+        "Error: Wrong number of arguments."
+      );
+    }
 
     return config;
   }
