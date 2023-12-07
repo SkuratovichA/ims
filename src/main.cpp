@@ -164,8 +164,6 @@ void Sample() {
 
 Sampler S(Sample, 0.01);
 
-const double DEFAULT_END_TIME = 10;
-
 int main(int argc, char **argv) {
 
   SimulationConfiguration configuration;
@@ -187,7 +185,7 @@ int main(int argc, char **argv) {
   );
   model = &localModel;
 
-  SetOutput("metabolic_model_output.dat");
+  SetOutput(configuration.imagePath.value_or(DEFAULT_IMAGE_PATH).c_str());
   Print("# Time Met AdoMet AdoHcy Hcy\n");
 
   const double startTime = 0;

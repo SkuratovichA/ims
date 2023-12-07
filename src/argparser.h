@@ -23,6 +23,7 @@ struct InitialSimulationConfiguration {
 struct SimulationConfiguration {
   std::optional<InitialSimulationConfiguration> initialSimulationConfiguration;
   std::optional<double> endTime;
+  std::optional<std::string> imagePath;
 };
 
 #define X(name) .name = 0.5,
@@ -32,15 +33,19 @@ const InitialSimulationConfiguration DEFAULT_SIMULATION_CONFIGURATION = {
 #undef X
 
 #define END_TIME_STR "endTime"
+#define IMAGE_PATH_STR "imagePath"
 const double MIN_END_TIME = 1;
+const double DEFAULT_END_TIME = 10;
+#define DEFAULT_IMAGE_PATH "metabolic_model_output.dat"
 
 namespace argparser {
   static std::string getUsage() {
 #define X(name) "--"#name " number "
     return (
-      "[ " SIMULATION_VARIABLES "]" " [--" END_TIME_STR " number]\n"
+      "[ " SIMULATION_VARIABLES "]" " [--" END_TIME_STR " number] [--" IMAGE_PATH_STR " string]\n"
       "  simulation parameters: µMol\n"
       "  endTime: (min " + std::to_string(MIN_END_TIME) + ")\n"
+      "  imagePath: string, default is " DEFAULT_IMAGE_PATH "\n"
     );
 #undef X
   }
@@ -55,6 +60,7 @@ namespace argparser {
       SIMULATION_VARIABLES
 #undef X
       {END_TIME_STR, required_argument, 0, 0},
+      {IMAGE_PATH_STR, required_argument, 0, 0},
       {0, 0, 0, 0}
     };
 
@@ -76,7 +82,9 @@ namespace argparser {
         char *anychars = NULL;
         const double value = std::strtod(optarg, &anychars);
 
-        if (*anychars != '\0') {
+        if (currentArg == IMAGE_PATH_STR) {
+          config.imagePath = optarg;
+        } else if (*anychars != '\0') {
           throw std::runtime_error("Error: Argument '" + currentArg + "' is not a number. Found \"" + anychars + "\"");
         }
 
@@ -123,7 +131,7 @@ namespace argparser {
 #undef X
     const auto iscLength = config.initialSimulationConfiguration ? sizeof(iscStrings) / sizeof(char*) : 0;
 
-    const auto numProcessedArgs = (iscLength + !!config.endTime.has_value()) * 2;
+    const auto numProcessedArgs = (iscLength + !!config.endTime.has_value() + !!config.imagePath.has_value()) * 2;
     const bool areAnyExtraArgs = numProcessedArgs != argc - 1;
     if (areAnyExtraArgs) {
       throw std::runtime_error(
