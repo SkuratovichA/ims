@@ -2,6 +2,7 @@
 #include "simlib.h"
 #include <assert.h>
 #include "argparser.h"
+#include <math.h> // pow
 
 constexpr double MU_MOL = 1e-6;
 constexpr double _5mthf = 5.2 * MU_MOL;
