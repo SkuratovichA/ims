@@ -59,17 +59,7 @@ createDataset() {
     mkdir -p "$pngDir"
   fi
 
-  for initialMet in "${initialMetArray[@]}"; do
-    for initialAdoMet in "${initialAdoMetArray[@]}"; do
-      for initialAdoHcy in "${initialAdoHcyArray[@]}"; do
-        for initialHcy in "${initialHcyArray[@]}"; do
-          for metin in "${metinArray[@]}"; do
-            runImsWithParams "$initialMet" "$initialAdoMet" "$initialAdoHcy" "$initialAdoMet" "$initialHcy" "$metin"
-          done
-        done
-      done
-    done
-  done
+  runImsWithParams "50" "65" "121" "57" "57"
 
   echo "CREATING PNG FILES..."
   for datFile in "$datDir"/*.dat; do

@@ -4,22 +4,22 @@
 #include "argparser.h"
 #include <math.h> // pow
 
-constexpr double MU_MOL = 1e-6;
-constexpr double _5mthf = 5.2 * MU_MOL;
+constexpr double MU = 1e-6;
+constexpr double _5mthf = 5.2 * MU;
 
-constexpr double V_mat1_max = 561 * MU_MOL;
-constexpr double K_mat1_m = 41 * MU_MOL;
-constexpr double K_mat1_i = 50 * MU_MOL;
+constexpr double V_mat1_max = 561 * MU;
+constexpr double K_mat1_m = 41 * MU;
+constexpr double K_mat1_i = 50 * MU;
 
-constexpr double V_mat3_max = 22870 * MU_MOL;
-constexpr double K_mat3_m2 = 21.1 * MU_MOL;
+constexpr double V_mat3_max = 22870 * MU;
+constexpr double K_mat3_m2 = 21.1 * MU;
 
-constexpr double V_gnmt_max = 10600 * MU_MOL;
-constexpr double K_gnmt_m = 4500 * MU_MOL;
-constexpr double K_gnmt_i = 20 * MU_MOL;
+constexpr double V_gnmt_max = 10600 * MU;
+constexpr double K_gnmt_m = 4500 * MU;
+constexpr double K_gnmt_i = 20 * MU;
 
-constexpr double V_meth_max = 4521 * MU_MOL;
-constexpr double K_meth_m2__A = 10 * MU_MOL; // shitty name :)
+constexpr double V_meth_max = 4521 * MU;
+constexpr double K_meth_m2__A = 10 * MU; // shitty name :)
 
 const double alpha_1 = 100;
 const double alpha_2 = 10;
@@ -27,15 +27,13 @@ const double alpha_2 = 10;
 const double beta_1 = 1.7;
 const double beta_2 = 30;
 
-constexpr double V_ms_max = 500 * MU_MOL;
-constexpr double K_ms_m_hcy = 0.1 * MU_MOL;
-constexpr double K_ms_m5mthf = 25 * MU_MOL;
-constexpr double K_ms_d = 1 * MU_MOL;
+constexpr double V_ms_max = 500 * MU;
+constexpr double K_ms_m_hcy = 0.1 * MU;
+constexpr double K_ms_m5mthf = 25 * MU;
+constexpr double K_ms_d = 1 * MU;
 
-constexpr double V_bhmt_max = 2500 * MU_MOL; // velocity. µ / h
-constexpr double K_bhmt_m = 12 * MU_MOL;
-
-constexpr double DEFAULT_T1 = 30.0;
+constexpr double V_bhmt_max = 2500 * MU; // velocity. µ / h
+constexpr double K_bhmt_m = 12 * MU;
 
 
 class Function3 : public aContiBlock3 {
