@@ -2,7 +2,7 @@
 #include "simlib.h"
 #include <assert.h>
 #include "argparser.h"
-#include <math.h> // pow
+#include <math.h> // pow, exp, log
 
 constexpr double MU = 1e-6;
 double _5mthf = 5.2 * MU;
@@ -150,10 +150,12 @@ double getTimeLog(double junk) {
 
 struct MetabolicModel {
   Integrator Met, AdoMet, AdoHcy, Hcy;
+  Expression Metin;
 
   Function3 fn_V_cbs, fn_V_bhmt;
   Function2 fn_V_mat1, fn_V_mat3, fn_V_gnmt, fn_V_ah;
   Function1 fn_V_meth, fn_K_mat3_m1, fn_V_ms;
+  Function1 fn_getTimeLinear, fn_getTimeLog, fn_getTimeExp;
 
   MetabolicModel(
     double initialMet,
@@ -171,12 +173,12 @@ struct MetabolicModel {
     fn_K_mat3_m1(Input(AdoMet), K_mat3_m1),
     fn_V_meth(Input(AdoMet), V_meth),
     fn_V_ms(Input(Hcy), V_ms),
+    fn_getTimeLinear(Input(Hcy), getTime),
+    fn_getTimeLog(Input(Hcy), getTimeLog),
+    fn_getTimeExp(Input(Hcy), getTimeExp),
 
-    // TODO if `* MU`, then we got weird graphs. Idk. Probably incorrect :)
-    Met(fn_V_ms + fn_V_bhmt + Metin * MU - fn_V_mat1 - fn_V_mat3, initialMet * MU),
-    AdoMet(fn_V_mat1 + fn_V_mat3 - fn_V_meth - fn_V_gnmt, initialAdoMet * MU),
-    AdoHcy(fn_V_meth + fn_V_gnmt - fn_V_ah, initialAdoHcy * MU),
-    Hcy(fn_V_ah - fn_V_cbs - fn_V_ms - fn_V_bhmt, initialHcy * MU) {}
+//    Metin(metinMax * MU * fn_getTimeLog),
+//    Metin(metinMax * MU * fn_getTimeExp),
     Metin(metinMax * MU),
 
       // TODO if `* MU`, then we got weird graphs. FUCK. Nevermind...
