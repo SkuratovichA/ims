@@ -36,7 +36,7 @@ buildSimlib() {
 
 buildProject() {
   echo "Building the project..."
-  mkdir -p build && cd build || return
+  rm -rf build && mkdir -p build && cd build || return
   cmake .. && make
 }
 
@@ -59,7 +59,7 @@ createDataset() {
     mkdir -p "$pngDir"
   fi
 
-  runImsWithParams "50" "65" "121" "57" "57"
+  runImsWithParams "50" "10" "5" "2" "50"
 
   echo "CREATING PNG FILES..."
   for datFile in "$datDir"/*.dat; do
@@ -91,6 +91,7 @@ main() {
       createArchive "$2"
       ;;
     create_dataset)
+      buildProject
       createDataset
       ;;
     *)
