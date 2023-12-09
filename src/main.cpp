@@ -19,14 +19,14 @@ constexpr double K_gnmt_m = 4500 * MU;
 constexpr double K_gnmt_i = 20 * MU;
 
 constexpr double V_meth_max = 4521 * MU;
-constexpr double K_meth_m2__A = 10 * MU; // shitty name :)
+constexpr double K_meth_m2__A = 10 * MU;
 
-// TODO: probably incorrect
-const double alpha_1 = 100; // 1/h ???
-const double alpha_2 = 10;
+constexpr double HOUR = 3600;
+const double alpha_1 = 100 / HOUR;
+const double alpha_2 = 10 / HOUR;
 
-const double beta_1 = 1.7; // 1.7 µ/h
-const double beta_2 = 30;
+const double beta_1 = 1.7 / HOUR;
+const double beta_2 = 30 / HOUR;
 
 constexpr double V_ms_max = 500 * MU;
 constexpr double K_ms_m_hcy = 0.1 * MU;
@@ -123,6 +123,31 @@ inline double V_bhmt(const double adoMet, const double adoHcy, const double hcy)
   return exp1 * exp2;
 }
 
+double maxTime = 10;
+
+inline double normalizeTime (double currentTime) {
+    return currentTime / maxTime;
+}
+
+double getTime (double junk) {
+    (void) junk;
+    return normalizeTime(T.Value());
+}
+
+double getTimeExp(double junk) {
+    (void) junk;
+    double normalizedTime = normalizeTime(T.Value());
+
+    return (exp(normalizedTime) - 1) / (exp(1) - 1);
+}
+
+double getTimeLog(double junk) {
+    (void) junk;
+    double normalizedTime = normalizeTime(T.Value());
+
+    return log1p(normalizedTime) / log1p(1);
+}
+
 struct MetabolicModel {
   Integrator Met, AdoMet, AdoHcy, Hcy;
 
@@ -135,8 +160,8 @@ struct MetabolicModel {
     double initialAdoMet,
     double initialAdoHcy,
     double initialHcy,
-    double Metin
-  ) : 
+    double metinMax
+  ) :
     fn_V_cbs(Input(AdoMet), Input(AdoHcy), Input(Hcy), V_cbs),
     fn_V_bhmt(Input(AdoMet), Input(AdoHcy), Input(Hcy), V_bhmt),
     fn_V_mat1(Input(Met), Input(AdoMet), V_mat1),
@@ -152,6 +177,13 @@ struct MetabolicModel {
     AdoMet(fn_V_mat1 + fn_V_mat3 - fn_V_meth - fn_V_gnmt, initialAdoMet * MU),
     AdoHcy(fn_V_meth + fn_V_gnmt - fn_V_ah, initialAdoHcy * MU),
     Hcy(fn_V_ah - fn_V_cbs - fn_V_ms - fn_V_bhmt, initialHcy * MU) {}
+    Metin(metinMax * MU),
+
+      // TODO if `* MU`, then we got weird graphs. FUCK. Nevermind...
+    Met(fn_V_ms + fn_V_bhmt + Metin - fn_V_mat1 - fn_V_mat3, initialMet),
+    AdoMet(fn_V_mat1 + fn_V_mat3 - fn_V_meth - fn_V_gnmt, initialAdoMet),
+    AdoHcy(fn_V_meth + fn_V_gnmt - fn_V_ah, initialAdoHcy),
+    Hcy(fn_V_ah - fn_V_cbs - fn_V_ms - fn_V_bhmt, initialHcy) {}
 };
 
 MetabolicModel *model = nullptr;
