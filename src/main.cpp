@@ -21,10 +21,11 @@ constexpr double K_gnmt_i = 20 * MU;
 constexpr double V_meth_max = 4521 * MU;
 constexpr double K_meth_m2__A = 10 * MU; // shitty name :)
 
-const double alpha_1 = 100;
+// TODO: probably incorrect
+const double alpha_1 = 100; // 1/h ???
 const double alpha_2 = 10;
 
-const double beta_1 = 1.7;
+const double beta_1 = 1.7; // 1.7 µ/h
 const double beta_2 = 30;
 
 constexpr double V_ms_max = 500 * MU;
@@ -146,11 +147,11 @@ struct MetabolicModel {
     fn_V_meth(Input(AdoMet), V_meth),
     fn_V_ms(Input(Hcy), V_ms),
 
-    // Initialize the integrators with their respective differential equations
-    Met(fn_V_ms + fn_V_bhmt + Metin - fn_V_mat1 - fn_V_mat3, initialMet),
-    AdoMet(fn_V_mat1 + fn_V_mat3 - fn_V_meth - fn_V_gnmt, initialAdoMet),
-    AdoHcy(fn_V_meth + fn_V_gnmt - fn_V_ah, initialAdoHcy),
-    Hcy(fn_V_ah - fn_V_cbs - fn_V_ms - fn_V_bhmt, initialHcy) {}
+    // TODO if `* MU`, then we got weird graphs. Idk. Probably incorrect :)
+    Met(fn_V_ms + fn_V_bhmt + Metin * MU - fn_V_mat1 - fn_V_mat3, initialMet * MU),
+    AdoMet(fn_V_mat1 + fn_V_mat3 - fn_V_meth - fn_V_gnmt, initialAdoMet * MU),
+    AdoHcy(fn_V_meth + fn_V_gnmt - fn_V_ah, initialAdoHcy * MU),
+    Hcy(fn_V_ah - fn_V_cbs - fn_V_ms - fn_V_bhmt, initialHcy * MU) {}
 };
 
 MetabolicModel *model = nullptr;
