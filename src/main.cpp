@@ -1,3 +1,6 @@
+// TODO: maybe print all the velocities etc.
+//  but maybe just fuck it.
+
 #include <iostream>
 #include "simlib.h"
 #include <assert.h>
@@ -192,11 +195,11 @@ MetabolicModel *model = nullptr;
 
 void Sample() {
   if (model != nullptr) {
-    Print("%6.2f %.5g %.5g %.5g %.5g\n", T.Value(), model->Met.Value(), model->AdoMet.Value(), model->AdoHcy.Value(), model->Hcy.Value());
+    Print("%6.2f %.5g %.5g %.5g %.5g %.5g\n", T.Value(), model->Met.Value(), model->AdoMet.Value(), model->AdoHcy.Value(), model->Hcy.Value(), model->Metin.Value());
   }
-};
+}
 
-Sampler S(Sample, 0.01);
+Sampler S(Sample, 0.1);
 
 int main(int argc, char **argv) {
 
