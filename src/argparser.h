@@ -12,10 +12,11 @@
   X(initialAdoMet)                                                             \
   X(initialAdoHcy)                                                             \
   X(initialHcy)                                                                \
-  X(metin)
+  X(metinMax)                                                                  \
+  X(thf_5m)
 
 struct InitialSimulationConfiguration {
-#define X(name) double name;
+#define X(name) std::optional<double> name;
   SIMULATION_VARIABLES
 #undef X
 };
@@ -35,7 +36,7 @@ const InitialSimulationConfiguration DEFAULT_SIMULATION_CONFIGURATION = {
 #define END_TIME_STR "endTime"
 #define IMAGE_PATH_STR "imagePath"
 const double MIN_END_TIME = 1;
-const double DEFAULT_END_TIME = 10;
+const double DEFAULT_END_TIME = 3600 * 2;
 #define DEFAULT_IMAGE_PATH "metabolic_model_output.dat"
 
 namespace argparser {
@@ -115,6 +116,8 @@ namespace argparser {
       }
     }
 
+    // validations
+#if 0
 #define X(name) if (!setFlags[#name])
     // Checking if all required initialSimulationConfiguration fields are set
     if (config.initialSimulationConfiguration) {
@@ -124,21 +127,22 @@ namespace argparser {
       }
     }
 #undef X
-    // if the length of inintialSimulationConfiguration + optional (endTime) !== argc - 1 then throw error
 
+    // if the length of inintialSimulationConfiguration + optional (endTime) !== argc - 1 then throw error
 #define X(name) #name,
     const char *(iscStrings[]) = { SIMULATION_VARIABLES };
 #undef X
     const auto iscLength = config.initialSimulationConfiguration ? sizeof(iscStrings) / sizeof(char*) : 0;
 
-    const auto numProcessedArgs = (iscLength + !!config.endTime.has_value() + !!config.imagePath.has_value()) * 2;
-    const bool areAnyExtraArgs = numProcessedArgs != argc - 1;
+    const auto numProcessedArgs = (iscLength + config.endTime.has_value() + config.imagePath.has_value()) * 2;
+    const bool areAnyExtraArgs = numProcessedArgs < argc - 1;
     if (areAnyExtraArgs) {
       throw std::runtime_error(
         "Error: Wrong number of arguments."
       );
     }
+#endif
 
     return config;
   }
-};
+}

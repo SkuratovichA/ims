@@ -5,7 +5,7 @@
 #include <math.h> // pow
 
 constexpr double MU = 1e-6;
-constexpr double _5mthf = 5.2 * MU;
+double _5mthf = 5.2 * MU;
 
 constexpr double V_mat1_max = 561 * MU;
 constexpr double K_mat1_m = 41 * MU;
@@ -175,13 +175,16 @@ int main(int argc, char **argv) {
     return -1;
   }
   const InitialSimulationConfiguration isc = configuration.initialSimulationConfiguration.value_or(DEFAULT_SIMULATION_CONFIGURATION);
-  
-  MetabolicModel localModel(
-    isc.initialMet,
-    isc.initialAdoMet,
-    isc.initialAdoHcy,
-    isc.initialHcy,
-    isc.metin
+
+  // hate this
+  _5mthf = isc.thf_5m.has_value() ? isc.thf_5m.value() * MU: _5mthf;
+
+  static MetabolicModel localModel(
+    isc.initialMet.value_or(100),
+    isc.initialAdoMet.value_or(100),
+    isc.initialAdoHcy.value_or(100),
+    isc.initialHcy.value_or(100),
+    isc.metinMax.value_or(100)
   );
   model = &localModel;
 
@@ -189,10 +192,10 @@ int main(int argc, char **argv) {
   Print("# Time Met AdoMet AdoHcy Hcy\n");
 
   const double startTime = 0;
-  const double endTime = configuration.endTime.value_or(DEFAULT_END_TIME);
-  Init(startTime, endTime);
-  SetStep(1e-3, 0.1);
-  SetAccuracy(1e-5, 0.01);
+  maxTime = configuration.endTime.value_or(DEFAULT_END_TIME); // 3600 seconds
+  Init(startTime, maxTime);
+  SetStep(1e-6, 1);
+  SetAccuracy(1e-5, 1e-3);
 
   Run();
 
