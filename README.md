@@ -3,7 +3,7 @@ continuous simulations
 
 ## Running
 1. `make build` to build and install everything needed (on MacOS, some errors need to be fixed manually 🤡).
-2. `make run` from the root directory.
+2. `make run` from the root directory. After running the program, the output will be stored in `graphs/pdf` directory.
 
 ## Documentation
 - `doc/documentation.pdf` for the project documentation.
