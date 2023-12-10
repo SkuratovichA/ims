@@ -44,7 +44,7 @@ runImsWithParams() {
   local initialHcy="$4"
   local metin="$5"
 
-  local datFileName="inMet-${initialMet}_inAdoMet-${initialAdoMet}_inAdoHcy-${initialAdoHcy}_inHcy-${initialHcy}_Met-${metin}_Folat=${thf_5m}.dat"
+  local datFileName="inMet-${initialMet}_inAdoMet-${initialAdoMet}_inAdoHcy-${initialAdoHcy}_inHcy-${initialHcy}_Met-${metin}.dat"
   ${buildDir}/./ims --initialMet "$initialMet" --initialAdoMet "$initialAdoMet" --initialAdoHcy "$initialAdoHcy" --initialHcy "$initialHcy" --metinMax "$metin" --imagePath "$datDir/$datFileName"
 
   echo RUNNING COMMAND: "${buildDir}/./ims" --initialMet "$initialMet" --initialAdoMet "$initialAdoMet" --initialAdoHcy "$initialAdoHcy" --initialHcy "$initialHcy" --metinMax "$metin" --imagePath "$datDir/$datFileName"
@@ -124,7 +124,7 @@ createArchive() {
   fi
 
   echo "Creating archive $archiveName.tar.gz..."
-  tar -czvf "$archiveName.tar.gz" CMakeLists.txt utils.sh README.md src doc
+  tar -czvf "$archiveName.tar.gz" CMakeLists.txt utils.sh README.md src doc Makefile
 }
 
 
