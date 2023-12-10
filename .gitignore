@@ -5,6 +5,7 @@ cmake-build-debug
 .cache
 .vscode
 .DS_Store
-# third_party
+third_party
 
 graphs
+*.gz
