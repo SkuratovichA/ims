@@ -24,8 +24,9 @@ buildSimlib() {
   echo "Building simlib..."
   cd "$simlibDir" || return
   mkdir -p bin && make clean
-  rm -rf bin/* # Clearing the bin directory
-  make && make PREFIX="$(pwd)/bin" install
+  rm -rf bin/* # Clearing the bin directory just in case
+  
+  cd src && make clean && cd - && make PREFIX="$(pwd)/bin" install
 
   cd "$rootDir" || return
 }
@@ -46,7 +47,7 @@ runImsWithParams() {
   local datFileName="inMet-${initialMet}_inAdoMet-${initialAdoMet}_inAdoHcy-${initialAdoHcy}_inHcy-${initialHcy}_Met-${metin}_Folat=${thf_5m}.dat"
   ${buildDir}/./ims --initialMet "$initialMet" --initialAdoMet "$initialAdoMet" --initialAdoHcy "$initialAdoHcy" --initialHcy "$initialHcy" --metinMax "$metin" --imagePath "$datDir/$datFileName"
 
-  echo COMMAND: "${buildDir}/./ims" --initialMet "$initialMet" --initialAdoMet "$initialAdoMet" --initialAdoHcy "$initialAdoHcy" --initialHcy "$initialHcy" --metinMax "$metin" --imagePath "$datDir/$datFileName"
+  echo RUNNING COMMAND: "${buildDir}/./ims" --initialMet "$initialMet" --initialAdoMet "$initialAdoMet" --initialAdoHcy "$initialAdoHcy" --initialHcy "$initialHcy" --metinMax "$metin" --imagePath "$datDir/$datFileName"
 }
 
 createDataset() {
@@ -58,14 +59,15 @@ createDataset() {
   fi
 
   #                 MET     AdoMet  AdoHcy   Hcy   MetinRate 5mthf
-  runImsWithParams "0.05"   "1000"  "0.1"   "0.1"  "50"  # don't touch this. this is correct
-  runImsWithParams "50"      "10"    "5"     "2"  "20" # don't touch this. this is correct
+  runImsWithParams "0.05"   "1000"  "0.1"   "0.1"  "50"
+  runImsWithParams "50"      "10"    "5"     "2"  "20"
 
+  echo -e "\n"
   echo "CREATING PNG FILES from" "$datDir"/*.dat
   for datFile in "$datDir"/*.dat ; do
     local graphFile="${datFile%.dat}.${graphExt}"
     local graphFile2="${datFile%.dat}LLLL.${graphExt}"
-    echo "Creating $graphFile..."
+    echo "CREATING GRAPH $graphFile..."
     gnuplot -e "set terminal pdf size 29.7cm, 84.1cm; \
                 set output '${graphFile}'; \
                 set multiplot layout 5,2 title 'Biology Data Overview'; \
@@ -92,23 +94,23 @@ createDataset() {
                 unset multiplot; \
                 set output;"
 
-      gnuplot -e "set terminal pdf size 40.7cm, 20.1cm; \
-                  set output '${graphFile2}'; \
-                  set multiplot layout 1,2 title 'Biology Data Overview'; \
-                  set datafile separator whitespace; \
-                  set lmargin 10; \
-                  set rmargin 10; \
-                  set tmargin 2; \
-                  set bmargin 2; \
-                  set title 'Met'; \
-                  set ylabel 'µM'; \
-                  plot '$datFile' using 1:2 with lines title 'Met'; \
-                  set title 'AdoMet'; \
-                  set ylabel 'µM'; \
-                  plot '$datFile' using 1:3 with lines title 'AdoMet'; \
-                  set title 'AdoHcy'; \
-                  set ylabel 'µM'; \
-                  set output;"
+    gnuplot -e "set terminal pdf size 40.7cm, 20.1cm; \
+                set output '${graphFile2}'; \
+                set multiplot layout 1,2 title 'Biology Data Overview'; \
+                set datafile separator whitespace; \
+                set lmargin 10; \
+                set rmargin 10; \
+                set tmargin 2; \
+                set bmargin 2; \
+                set title 'Met'; \
+                set ylabel 'µM'; \
+                plot '$datFile' using 1:2 with lines title 'Met'; \
+                set title 'AdoMet'; \
+                set ylabel 'µM'; \
+                plot '$datFile' using 1:3 with lines title 'AdoMet'; \
+                set title 'AdoHcy'; \
+                set ylabel 'µM'; \
+                set output;"
   done
   mv "$datDir"/*.$graphExt "$pngDir"
 }
@@ -122,27 +124,28 @@ createArchive() {
   fi
 
   echo "Creating archive $archiveName.tar.gz..."
-  tar -czvf "$archiveName.tar.gz" CMakeLists.txt utils.sh README.md src
+  tar -czvf "$archiveName.tar.gz" CMakeLists.txt utils.sh README.md src doc
 }
+
 
 main() {
   case $1 in
-    build)
-      buildProject
+    run)
+      createDataset
       ;;
-    build_all)
+    build)
       buildSimlib
       buildProject
       ;;
     archive)
       createArchive "$2"
       ;;
-    create_dataset)
+    rerun)
       buildProject
       createDataset
       ;;
     *)
-      echo "Usage: $0 [build_all|build|archive <archiveName>|create_dataset]"
+      echo "Usage: $0 build|archive <archiveName>|run|rerun]"
       ;;
   esac
 }
