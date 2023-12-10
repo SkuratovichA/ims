@@ -61,6 +61,7 @@ double Function3::Value() {
   return ret;
 }
 
+uint a = 0;
 inline double V_ms(const double hcy) {
   // Michaelis-Menten equation implementation
   double numerator = V_ms_max * _5mthf * hcy;
@@ -68,7 +69,8 @@ inline double V_ms(const double hcy) {
   double denominator1 = K_ms_m_hcy * (K_ms_d + _5mthf);
   double denominator2 = hcy * (K_ms_m5mthf + _5mthf);
   double denominator = denominator1 + denominator2;
-
+  if ((++a % 100000) == 0)
+      std::cerr << "V MS " << numerator / denominator << std::endl;
   return numerator / denominator;
 }
 
@@ -84,21 +86,27 @@ inline double V_meth(const double adoMeth) {
 inline double K_mat3_m1(const double adoMet) {
   const double adoMet_exp = adoMet / (adoMet + 600);
 
-  return 2000 / (1 + 5.7 * (adoMet_exp * adoMet_exp));
+  return 20000 / (1 + 5.7 * (adoMet_exp * adoMet_exp));
 }
 
+uint b = 0;
 inline double V_mat1(const double met, const double adoMet) {
   const double denominator1 = (K_mat1_m / met) * (1 + adoMet / K_mat1_i);
   const double denominator = 1 + denominator1;
 
   assert(denominator != 0 && "Denominiator must not be zero");
+    if ((++b % 100000) == 0)
+        std::cerr << "V MAT1 " << V_mat1_max / denominator << std::endl;
 
   return V_mat1_max / denominator;
 }
 
+uint c = 0;
 inline double V_mat3(const double met, const double adoMet) {
   const double denominator = 1 + (K_mat3_m1(adoMet) * K_mat3_m2) / (met * (met + K_mat3_m2));
 
+    if ((++c % 100000) == 0)
+        std::cerr << "V MAT3 " << V_mat3_max / denominator << std::endl;
   return V_mat3_max / denominator;
 }
 
@@ -181,8 +189,8 @@ struct MetabolicModel {
     fn_getTimeExp(Input(Hcy), getTimeExp),
 
 //    Metin(metinMax * MU * fn_getTimeLog),
-//    Metin(metinMax * MU * fn_getTimeExp),
-    Metin(metinMax * MU),
+    Metin(metinMax * MU * fn_getTimeExp),
+//    Metin(metinMax * MU),
 
       // TODO if `* MU`, then we got weird graphs. FUCK. Nevermind...
     Met(fn_V_ms + fn_V_bhmt + Metin - fn_V_mat1 - fn_V_mat3, initialMet),
@@ -215,6 +223,7 @@ int main(int argc, char **argv) {
 
   // hate this
   _5mthf = isc.thf_5m.has_value() ? isc.thf_5m.value() * MU: _5mthf;
+  std::cerr << "Fallat " << _5mthf << std::endl;
 
   static MetabolicModel localModel(
     isc.initialMet.value_or(100),
@@ -232,7 +241,7 @@ int main(int argc, char **argv) {
   maxTime = configuration.endTime.value_or(DEFAULT_END_TIME); // 3600 seconds
   Init(startTime, maxTime);
   SetStep(1e-6, 1);
-  SetAccuracy(1e-5, 1e-3);
+  SetAccuracy(1e-3, 1e-1);
 
   Run();
 

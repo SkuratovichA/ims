@@ -42,11 +42,12 @@ runImsWithParams() {
   local initialAdoHcy="$3"
   local initialHcy="$4"
   local metin="$5"
+  local thf_5m="$6"
 
-  local datFileName="inMet-${initialMet}_inAdoMet-${initialAdoMet}_inAdoHcy-${initialAdoHcy}_inHcy-${initialHcy}_Met-${metin}.dat"
-  ${buildDir}/./ims --initialMet "$initialMet" --initialAdoMet "$initialAdoMet" --initialAdoHcy "$initialAdoHcy" --initialHcy "$initialHcy" --metinMax "$metin" --imagePath "$datDir/$datFileName"
+  local datFileName="inMet-${initialMet}_inAdoMet-${initialAdoMet}_inAdoHcy-${initialAdoHcy}_inHcy-${initialHcy}_Met-${metin}_Folat=${thf_5m}.dat"
+  ${buildDir}/./ims --initialMet "$initialMet" --initialAdoMet "$initialAdoMet" --initialAdoHcy "$initialAdoHcy" --initialHcy "$initialHcy" --metinMax "$metin" --imagePath "$datDir/$datFileName" --thf_5m "$thf_5m"
 
-  echo COMMAND: "${buildDir}/./ims" --initialMet "$initialMet" --initialAdoMet "$initialAdoMet" --initialAdoHcy "$initialAdoHcy" --initialHcy "$initialHcy" --metinMax "$metin" --imagePath "$datDir/$datFileName"
+  echo COMMAND: "${buildDir}/./ims" --initialMet "$initialMet" --initialAdoMet "$initialAdoMet" --initialAdoHcy "$initialAdoHcy" --initialHcy "$initialHcy" --metinMax "$metin" --imagePath "$datDir/$datFileName" --thf_5m "$thf_5m"
 }
 
 createDataset() {
@@ -57,8 +58,20 @@ createDataset() {
     mkdir -p "$pngDir"
   fi
 
-  #                MET AdoMet AdoHcy Hcy MetinRate
-  runImsWithParams "50" "10"   "5"   "2"   "50"
+  #                 MET     AdoMet  AdoHcy   Hcy   MetinRate 5mthf
+#  runImsWithParams "0.5"   "0.1"    "1"     "1"     "10000" "23.3"
+#  runImsWithParams "0.5"   "0.1"    "0.1"   "0.1"   "10000" "23.3"
+#  runImsWithParams "00.5"   "00.1"  "00.1"  "00.1"  "10000" "23.3"
+
+#  runImsWithParams "0.05"   "1000"  "1"    "1"     "5000"  "23.3" # don't touch this. this is correct
+#  runImsWithParams "0.05"   "1000"  "0.1"  "0.1"   "5000" "2.3" # don't touch this. this is correct
+#  runImsWithParams "0.05"   "1000"  "0.1"  "0.1"  "5000" "3.2" # don't touch this. this is correct
+
+   runImsWithParams "0.05"   "1000"  "0.1"  "0.1"  "5000" "520000000" # don't touch this. this is correct
+   runImsWithParams "0.05"   "1000"  "0.1"  "0.1"  "5000" "52" # don't touch this. this is correct
+
+#   runImsWithParams "50"   "10"  "5"  "2"  "50" "5.2" # don't touch this. this is correct
+
 #  runImsWithParams "50" "10" "5" "2" "50"
 
   echo "CREATING PNG FILES from" "$datDir"/*.dat
