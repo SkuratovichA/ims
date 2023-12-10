@@ -66,8 +66,7 @@ createDataset() {
   echo "CREATING PNG FILES from" "$datDir"/*.dat
   for datFile in "$datDir"/*.dat ; do
     local graphFile="${datFile%.dat}.${graphExt}"
-    local graphFile2="${datFile%.dat}LLLL.${graphExt}"
-    echo "CREATING GRAPH $graphFile..."
+    local graphFile2="${datFile%.dat}-v2.${graphExt}"
     gnuplot -e "set terminal pdf size 29.7cm, 84.1cm; \
                 set output '${graphFile}'; \
                 set multiplot layout 5,2 title 'Biology Data Overview'; \
@@ -114,6 +113,7 @@ createDataset() {
                 set output;"
   done
   mv "$datDir"/*.$graphExt "$pngDir"
+  echo "CREATED GRAPHS: " "$pngDir"/*.pdf
 }
 
 createArchive() {
