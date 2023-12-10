@@ -36,7 +36,7 @@ const InitialSimulationConfiguration DEFAULT_SIMULATION_CONFIGURATION = {
 #define END_TIME_STR "endTime"
 #define IMAGE_PATH_STR "imagePath"
 const double MIN_END_TIME = 1;
-const double DEFAULT_END_TIME = 3600;
+const double DEFAULT_END_TIME = 3600 * 2;
 #define DEFAULT_IMAGE_PATH "metabolic_model_output.dat"
 
 namespace argparser {
