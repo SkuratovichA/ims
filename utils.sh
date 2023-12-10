@@ -110,6 +110,7 @@ createDataset() {
                 plot '$datFile' using 1:3 with lines title 'AdoMet'; \
                 set title 'AdoHcy'; \
                 set ylabel 'µM'; \
+                unset multiplot; \
                 set output;"
   done
   mv "$datDir"/*.$graphExt "$pngDir"
