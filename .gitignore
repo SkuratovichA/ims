@@ -4,11 +4,7 @@ cmake-build-debug
 .cached
 .cache
 .vscode
-third_party
+.DS_Store
+# third_party
 
-**/**/*.dat
-**/*.dat
-**/**/*.png
-**/*.png
-*.dat
-*.png
+graphs
